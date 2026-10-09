@@ -20,13 +20,13 @@ else()
 endif()
 
 set(STUDY_SOURCES
-  01_memory_ownership.cpp
-  02_polymorphism.cpp
-  03_rtti_isa_dyncast.cpp
-  04_ir_data_structures.cpp
-  05_ssa_construction.cpp
-  06_dataflow_analysis.cpp
-  07_register_allocation.cpp
+  cpp_language/01_memory_ownership.cpp
+  cpp_language/02_polymorphism.cpp
+  cpp_language/03_rtti_isa_dyncast.cpp
+  ir_and_ssa/04_ir_data_structures.cpp
+  ir_and_ssa/05_ssa_construction.cpp
+  analysis_and_codegen/06_dataflow_analysis.cpp
+  analysis_and_codegen/07_register_allocation.cpp
 )
 
 enable_testing()
@@ -40,7 +40,7 @@ endforeach()
 # Optional: prove the isa<>/dyn_cast<> machinery works without RTTI, the way
 # LLVM actually builds. The dynamic_cast comparison block compiles out.
 if(NOT MSVC)
-  add_executable(03_no_rtti 03_rtti_isa_dyncast.cpp)
+  add_executable(03_no_rtti cpp_language/03_rtti_isa_dyncast.cpp)
   target_include_directories(03_no_rtti PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   target_compile_options(03_no_rtti PRIVATE -fno-rtti)
   add_test(NAME 03_no_rtti COMMAND 03_no_rtti)

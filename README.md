@@ -18,13 +18,16 @@ LLVM and MLIR's coding standards require **C++17** as the baseline (a proposal t
 compiler-mechanics-cpp/
 ├── CMakeLists.txt
 ├── test_support.h
-├── 01_memory_ownership.cpp
-├── 02_polymorphism.cpp
-├── 03_rtti_isa_dyncast.cpp
-├── 04_ir_data_structures.cpp
-├── 05_ssa_construction.cpp
-├── 06_dataflow_analysis.cpp
-└── 07_register_allocation.cpp
+├── cpp_language/
+│   ├── 01_memory_ownership.cpp
+│   ├── 02_polymorphism.cpp
+│   └── 03_rtti_isa_dyncast.cpp
+├── ir_and_ssa/
+│   ├── 04_ir_data_structures.cpp
+│   └── 05_ssa_construction.cpp
+└── analysis_and_codegen/
+    ├── 06_dataflow_analysis.cpp
+    └── 07_register_allocation.cpp
 ```
 
 No external dependencies — standard library only. Tests use a lightweight `CHECK`/`assert`-based harness (`test_support.h`), not a full test framework, so the whole repo builds with just a compiler.
@@ -100,7 +103,7 @@ Each topic file becomes its own executable (`01_memory_ownership`, `02_polymorph
 ### Option B — One file at a time, no CMake required
 
 ```bash
-g++ -std=c++17 -Wall -Wextra -g -I. 05_ssa_construction.cpp -o ssa
+g++ -std=c++17 -Wall -Wextra -g -I. ir_and_ssa/05_ssa_construction.cpp -o ssa
 ./ssa
 ```
 
@@ -109,7 +112,7 @@ Repeat for any file. Useful when you're only studying one topic and want a fast 
 ### Option C — Sanitizers (recommended for file 04, which does manual pointer/list surgery)
 
 ```bash
-g++ -std=c++17 -g -fsanitize=address,undefined -I. 04_ir_data_structures.cpp -o ir
+g++ -std=c++17 -g -fsanitize=address,undefined -I. ir_and_ssa/04_ir_data_structures.cpp -o ir
 ./ir
 ```
 
@@ -118,7 +121,7 @@ g++ -std=c++17 -g -fsanitize=address,undefined -I. 04_ir_data_structures.cpp -o 
 The CMake build also compiles `03_rtti_isa_dyncast.cpp` a second time with `-fno-rtti` to prove the `isa<>`/`dyn_cast<>` machinery works without compiler RTTI support (the `dynamic_cast` comparison block compiles out automatically). To do it manually:
 
 ```bash
-g++ -std=c++17 -fno-rtti -I. 03_rtti_isa_dyncast.cpp -o isa_no_rtti
+g++ -std=c++17 -fno-rtti -I. cpp_language/03_rtti_isa_dyncast.cpp -o isa_no_rtti
 ./isa_no_rtti
 ```
 
