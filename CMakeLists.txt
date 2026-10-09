@@ -19,24 +19,21 @@ else()
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# Every .cpp under these folders is a standalone study program + test. Drop a
+# Every .cpp under cpp/ and compiler/ is a standalone study program + test. Drop a
 # new file into a group folder and re-run cmake; no list to maintain.
 file(GLOB_RECURSE STUDY_SOURCES CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-  cpp_language/*.cpp
-  ir_and_ssa/*.cpp
-  analysis_and_codegen/*.cpp
-  cpp_techniques/*.cpp
-  backend/*.cpp
+  cpp/*.cpp
+  compiler/*.cpp
 )
 
 enable_testing()
 foreach(src ${STUDY_SOURCES})
-  # cpp_techniques/memory_layout/01_bump_allocator.cpp -> memory_layout.01_bump_allocator
+  # cpp/techniques/memory_layout/01_bump_allocator.cpp -> memory_layout.01_bump_allocator
   # (group prefix because numbering restarts in each group folder).
   get_filename_component(name ${src} NAME_WE)
   get_filename_component(dir ${src} DIRECTORY)
   get_filename_component(group ${dir} NAME)
-  if(src MATCHES "^cpp_techniques/")
+  if(src MATCHES "^cpp/techniques/")
     set(target ${group}.${name})
   else()
     set(target ${name})
@@ -45,7 +42,7 @@ foreach(src ${STUDY_SOURCES})
   target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   # backend/ is deliberately newer C++ (std::format, std::ranges::contains,
   # designated initializers); everything else stays on LLVM's C++17 baseline.
-  if(src MATCHES "^backend/")
+  if(src MATCHES "^compiler/backend/")
     set_target_properties(${target} PROPERTIES CXX_STANDARD 23)
   endif()
   add_test(NAME ${target} COMMAND ${target})
@@ -54,7 +51,7 @@ endforeach()
 # Optional: prove the isa<>/dyn_cast<> machinery works without RTTI, the way
 # LLVM actually builds. The dynamic_cast comparison block compiles out.
 if(NOT MSVC)
-  add_executable(03_no_rtti cpp_language/03_rtti_isa_dyncast.cpp)
+  add_executable(03_no_rtti cpp/language/03_rtti_isa_dyncast.cpp)
   target_include_directories(03_no_rtti PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   target_compile_options(03_no_rtti PRIVATE -fno-rtti)
   add_test(NAME 03_no_rtti COMMAND 03_no_rtti)

@@ -18,34 +18,20 @@ LLVM and MLIR's coding standards require **C++17** as the baseline (a proposal t
 
 ```
 compiler-mechanics-cpp/
-├── CMakeLists.txt
-├── test_support.h
-├── cpp_language/
-│   ├── 01_memory_ownership.cpp
-│   ├── 02_polymorphism.cpp
-│   └── 03_rtti_isa_dyncast.cpp
-├── ir_and_ssa/
-│   ├── 04_ir_data_structures.cpp
-│   └── 05_ssa_construction.cpp
-├── analysis_and_codegen/
-│   ├── 06_dataflow_analysis.cpp
-│   └── 07_register_allocation.cpp
-├── cpp_techniques/                  ← LLVM/MLIR C++ idioms, grouped by family
-│   ├── memory_layout/               (arenas, SmallVector, tagged pointers, trailing objects)
-│   ├── compile_time/                (X-macros/.def files, type traits, SFINAE)
-│   ├── error_handling/              (Expected<T> without exceptions)
-│   ├── views_and_callables/         (ArrayRef/StringRef, function_ref)
-│   └── uniquing/                    (string interning, hash-consed types)
-├── backend/                         ← code generation, 08–13 (C++23)
-│   ├── 08_phi_elimination.cpp
-│   ├── 09_instruction_selection.cpp
-│   ├── 10_live_intervals_linear_scan.cpp
-│   ├── 11_scheduling_and_layout.cpp
-│   ├── 12_stack_frame_abi.cpp
-│   └── 13_peephole.cpp
-└── docs/
-    └── optimization_guide/          ← how the optimizer transforms your C++ (8 chapters)
+├── CMakeLists.txt, test_support.h, alloc_counter.h
+├── cpp/                             ← layer 1: the C++ (C++17)
+│   ├── language/                    (01–03: ownership, polymorphism, isa/dyn_cast)
+│   └── techniques/                  (LLVM/MLIR idioms, grouped by family)
+│       ├── memory_layout/  compile_time/  error_handling/
+│       └── views_and_callables/  uniquing/
+├── compiler/                        ← layer 2: the pipeline (04–13)
+│   ├── compiler/ir_and_ssa/                  (04–05)
+│   ├── compiler/analysis_and_codegen/        (06–07)
+│   └── backend/                     (08–13, C++23)
+└── docs/optimization_guide/         ← layer 3: what the optimizer does (8 chapters)
 ```
+
+Every folder has its own small README with a file table.
 
 The [optimization guide](docs/optimization_guide/README.md) covers what the compiler does *with* the SSA these files build: cleanups, control flow, loops, vectorization, alias analysis, bounds-check elimination, LTO/PGO and hardware-level effects. Claims are checked against real Clang output.
 
@@ -102,7 +88,7 @@ A Chaitin–Briggs-style allocator: simplify (remove degree-`< K` nodes), optimi
 - A live-range → interference-graph builder, connecting this file back to the liveness analysis in file 06
 - A `verify()` function asserting no two interfering registers ever share a color
 
-### `cpp_techniques/` — LLVM/MLIR C++ idioms, grouped by family
+### `cpp/techniques/` — LLVM/MLIR C++ idioms, grouped by family
 
 Numbering restarts inside each group folder. The CMake target and test name is `<group>.<file>`, e.g. `memory_layout.02_small_vector`. Files that count heap allocations include `alloc_counter.h`, which replaces global `operator new`. That is why each sample is its own executable.
 
@@ -135,7 +121,7 @@ Picks up where `07` leaves off: how SSA becomes real instructions in real regist
 
 ### Adding a new sample
 
-1. Pick a group folder under `cpp_techniques/`, or create a new one for a new family.
+1. Pick a group folder under `cpp/techniques/`, or create a new one for a new family.
 2. Add `NN_short_name.cpp` with the next number in that folder. Follow the existing shape: a header comment explaining *why compilers use this*, the minimal implementation, `testX()` functions using `CHECK`, and `main()` returning `ts::report("<group>/<file>")`.
 3. Re-run `cmake -S . -B build`. The glob picks the file up as a new executable and `ctest` entry.
 
@@ -159,16 +145,16 @@ Each topic file becomes its own executable (`01_memory_ownership`, `02_polymorph
 ### Option B — One file at a time, no CMake required
 
 ```bash
-g++ -std=c++17 -Wall -Wextra -g -I. ir_and_ssa/05_ssa_construction.cpp -o ssa
+g++ -std=c++17 -Wall -Wextra -g -I. compiler/ir_and_ssa/05_ssa_construction.cpp -o ssa
 ./ssa
 ```
 
-Repeat for any file. Useful when you're only studying one topic and want a fast edit-compile-run loop. For `backend/` files use `-std=c++23`.
+Repeat for any file. Useful when you're only studying one topic and want a fast edit-compile-run loop. For `compiler/backend/` files use `-std=c++23`.
 
 ### Option C — Sanitizers (recommended for file 04, which does manual pointer/list surgery)
 
 ```bash
-g++ -std=c++17 -g -fsanitize=address,undefined -I. ir_and_ssa/04_ir_data_structures.cpp -o ir
+g++ -std=c++17 -g -fsanitize=address,undefined -I. compiler/ir_and_ssa/04_ir_data_structures.cpp -o ir
 ./ir
 ```
 
@@ -177,7 +163,7 @@ g++ -std=c++17 -g -fsanitize=address,undefined -I. ir_and_ssa/04_ir_data_structu
 The CMake build also compiles `03_rtti_isa_dyncast.cpp` a second time with `-fno-rtti` to prove the `isa<>`/`dyn_cast<>` machinery works without compiler RTTI support (the `dynamic_cast` comparison block compiles out automatically). To do it manually:
 
 ```bash
-g++ -std=c++17 -fno-rtti -I. cpp_language/03_rtti_isa_dyncast.cpp -o isa_no_rtti
+g++ -std=c++17 -fno-rtti -I. cpp/language/03_rtti_isa_dyncast.cpp -o isa_no_rtti
 ./isa_no_rtti
 ```
 
@@ -189,7 +175,7 @@ g++ -std=c++17 -fno-rtti -I. cpp_language/03_rtti_isa_dyncast.cpp -o isa_no_rtti
 2. `04_ir_data_structures.cpp` — how IR nodes are actually stored in memory.
 3. `05_ssa_construction.cpp` — the highest-leverage file; try deleting the dead-phi elimination step and see which φ node survives, to feel the difference between minimal and pruned SSA.
 4. `06_dataflow_analysis.cpp` → `07_register_allocation.cpp` — these connect directly: liveness output becomes the register-interference graph.
-5. `backend/08` → `13` — the rest of code generation, in pipeline order: leave SSA, select instructions, allocate registers (with spilling), schedule and lay out blocks, build the frame, clean up with peepholes. Answer each file's CHECKPOINT before moving on.
+5. `compiler/backend/08` → `13` — the rest of code generation, in pipeline order: leave SSA, select instructions, allocate registers (with spilling), schedule and lay out blocks, build the frame, clean up with peepholes. Answer each file's CHECKPOINT before moving on.
 
 ## License
 
