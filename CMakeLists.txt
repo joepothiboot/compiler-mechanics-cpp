@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20) # 3.20: first version that knows CXX_STANDARD 23
 project(cpp_for_compilers CXX)
 
 # C++17: LLVM's required baseline. Building your study code with the same
@@ -19,21 +19,35 @@ else()
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-set(STUDY_SOURCES
-  cpp_language/01_memory_ownership.cpp
-  cpp_language/02_polymorphism.cpp
-  cpp_language/03_rtti_isa_dyncast.cpp
-  ir_and_ssa/04_ir_data_structures.cpp
-  ir_and_ssa/05_ssa_construction.cpp
-  analysis_and_codegen/06_dataflow_analysis.cpp
-  analysis_and_codegen/07_register_allocation.cpp
+# Every .cpp under these folders is a standalone study program + test. Drop a
+# new file into a group folder and re-run cmake; no list to maintain.
+file(GLOB_RECURSE STUDY_SOURCES CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  cpp_language/*.cpp
+  ir_and_ssa/*.cpp
+  analysis_and_codegen/*.cpp
+  cpp_techniques/*.cpp
+  backend/*.cpp
 )
 
 enable_testing()
 foreach(src ${STUDY_SOURCES})
-  get_filename_component(target ${src} NAME_WE)
+  # cpp_techniques/memory_layout/01_bump_allocator.cpp -> memory_layout.01_bump_allocator
+  # (group prefix because numbering restarts in each group folder).
+  get_filename_component(name ${src} NAME_WE)
+  get_filename_component(dir ${src} DIRECTORY)
+  get_filename_component(group ${dir} NAME)
+  if(src MATCHES "^cpp_techniques/")
+    set(target ${group}.${name})
+  else()
+    set(target ${name})
+  endif()
   add_executable(${target} ${src})
   target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  # backend/ is deliberately newer C++ (std::format, std::ranges::contains,
+  # designated initializers); everything else stays on LLVM's C++17 baseline.
+  if(src MATCHES "^backend/")
+    set_target_properties(${target} PROPERTIES CXX_STANDARD 23)
+  endif()
   add_test(NAME ${target} COMMAND ${target})
 endforeach()
 
