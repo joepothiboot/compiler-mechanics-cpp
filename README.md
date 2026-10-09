@@ -25,10 +25,14 @@ compiler-mechanics-cpp/
 ├── ir_and_ssa/
 │   ├── 04_ir_data_structures.cpp
 │   └── 05_ssa_construction.cpp
-└── analysis_and_codegen/
-    ├── 06_dataflow_analysis.cpp
-    └── 07_register_allocation.cpp
+├── analysis_and_codegen/
+│   ├── 06_dataflow_analysis.cpp
+│   └── 07_register_allocation.cpp
+└── docs/
+    └── optimization_guide/          ← how the optimizer transforms your C++ (8 chapters)
 ```
+
+The [optimization guide](docs/optimization_guide/README.md) covers what the compiler does *with* the SSA these files build: cleanups, control flow, loops, vectorization, alias analysis, bounds-check elimination, LTO/PGO and hardware-level effects. Claims are checked against real Clang output.
 
 No external dependencies — standard library only. Tests use a lightweight `CHECK`/`assert`-based harness (`test_support.h`), not a full test framework, so the whole repo builds with just a compiler.
 
