@@ -13,7 +13,7 @@ cmake -S . -B build && cmake --build build -j && ctest --test-dir build --output
 ```sh
 mkdir -p build/bin
 for f in $(find . -name '*.cpp' -not -path './build/*' | sort); do
-  std=c++17; case $f in ./compiler/backend/*) std=c++23;; esac
+  std=c++17; case ${f##*/} in 08_*|09_*|1[0-3]_*) std=c++23;; esac
   n=$(echo ${f#./} | tr / _ | sed 's/\.cpp$//')
   g++ -std=$std -Wall -Wextra -g -I. $f -o build/bin/$n && build/bin/$n || echo "FAILED: $f"
 done
@@ -22,35 +22,35 @@ done
 ## One file each
 
 ```sh
-g++ -std=c++17 -Wall -Wextra -g -I. compiler/analysis_and_codegen/06_dataflow_analysis.cpp -o build/bin/analysis_and_codegen_06_dataflow_analysis && build/bin/analysis_and_codegen_06_dataflow_analysis
+g++ -std=c++17 -Wall -Wextra -g -I. compiler/02_analysis/06_dataflow_analysis.cpp -o build/bin/a_06_dataflow_analysis && build/bin/a_06_dataflow_analysis
 ```
 
 ```sh
-g++ -std=c++17 -Wall -Wextra -g -I. compiler/analysis_and_codegen/07_register_allocation.cpp -o build/bin/analysis_and_codegen_07_register_allocation && build/bin/analysis_and_codegen_07_register_allocation
+g++ -std=c++17 -Wall -Wextra -g -I. compiler/05_register_alloc/07_register_allocation.cpp -o build/bin/a_07_register_allocation && build/bin/a_07_register_allocation
 ```
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -g -I. compiler/backend/08_phi_elimination.cpp -o build/bin/backend_08_phi_elimination && build/bin/backend_08_phi_elimination
+g++ -std=c++23 -Wall -Wextra -g -I. compiler/03_lowering/08_phi_elimination.cpp -o build/bin/a_08_phi_elimination && build/bin/a_08_phi_elimination
 ```
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -g -I. compiler/backend/09_instruction_selection.cpp -o build/bin/backend_09_instruction_selection && build/bin/backend_09_instruction_selection
+g++ -std=c++23 -Wall -Wextra -g -I. compiler/03_lowering/09_instruction_selection.cpp -o build/bin/a_09_instruction_selection && build/bin/a_09_instruction_selection
 ```
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -g -I. compiler/backend/10_live_intervals_linear_scan.cpp -o build/bin/backend_10_live_intervals_linear_scan && build/bin/backend_10_live_intervals_linear_scan
+g++ -std=c++23 -Wall -Wextra -g -I. compiler/05_register_alloc/10_live_intervals_linear_scan.cpp -o build/bin/a_10_live_intervals_linear_scan && build/bin/a_10_live_intervals_linear_scan
 ```
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -g -I. compiler/backend/11_scheduling_and_layout.cpp -o build/bin/backend_11_scheduling_and_layout && build/bin/backend_11_scheduling_and_layout
+g++ -std=c++23 -Wall -Wextra -g -I. compiler/04_scheduling/11_scheduling_and_layout.cpp -o build/bin/a_11_scheduling_and_layout && build/bin/a_11_scheduling_and_layout
 ```
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -g -I. compiler/backend/12_stack_frame_abi.cpp -o build/bin/backend_12_stack_frame_abi && build/bin/backend_12_stack_frame_abi
+g++ -std=c++23 -Wall -Wextra -g -I. compiler/06_frame_and_peephole/12_stack_frame_abi.cpp -o build/bin/a_12_stack_frame_abi && build/bin/a_12_stack_frame_abi
 ```
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -g -I. compiler/backend/13_peephole.cpp -o build/bin/backend_13_peephole && build/bin/backend_13_peephole
+g++ -std=c++23 -Wall -Wextra -g -I. compiler/06_frame_and_peephole/13_peephole.cpp -o build/bin/a_13_peephole && build/bin/a_13_peephole
 ```
 
 ```sh
@@ -110,15 +110,15 @@ g++ -std=c++17 -Wall -Wextra -g -I. cpp/techniques/views_and_callables/02_functi
 ```
 
 ```sh
-g++ -std=c++17 -Wall -Wextra -g -I. compiler/ir_and_ssa/04_ir_data_structures.cpp -o build/bin/ir_and_ssa_04_ir_data_structures && build/bin/ir_and_ssa_04_ir_data_structures
+g++ -std=c++17 -Wall -Wextra -g -I. compiler/01_ir_and_ssa/04_ir_data_structures.cpp -o build/bin/ir_and_ssa_04_ir_data_structures && build/bin/ir_and_ssa_04_ir_data_structures
 ```
 
 ```sh
-g++ -std=c++17 -Wall -Wextra -g -I. compiler/ir_and_ssa/05_ssa_construction.cpp -o build/bin/ir_and_ssa_05_ssa_construction && build/bin/ir_and_ssa_05_ssa_construction
+g++ -std=c++17 -Wall -Wextra -g -I. compiler/01_ir_and_ssa/05_ssa_construction.cpp -o build/bin/ir_and_ssa_05_ssa_construction && build/bin/ir_and_ssa_05_ssa_construction
 ```
 
 ## Sanitizers (useful for 04_ir_data_structures)
 
 ```sh
-g++ -std=c++17 -g -fsanitize=address,undefined -I. compiler/ir_and_ssa/04_ir_data_structures.cpp -o build/bin/asan && build/bin/asan
+g++ -std=c++17 -g -fsanitize=address,undefined -I. compiler/01_ir_and_ssa/04_ir_data_structures.cpp -o build/bin/asan && build/bin/asan
 ```

@@ -10,7 +10,7 @@ Frontend/backend engineers moving into systems roles usually know modern C++ syn
 
 LLVM and MLIR's coding standards require **C++17** as the baseline (a proposal to raise it to C++20 exists but hasn't landed as the enforced default). Writing C++17 here — structured bindings, `if`-init statements, `std::variant`, CTAD, fold-expression-adjacent patterns, but *no* concepts/ranges/coroutines — builds the exact muscle memory you'll use on day one in an LLVM/MLIR codebase.
 
-**Exception: `backend/` uses C++23** (`std::format`, `std::ranges::contains`, designated initializers, `std::countr_zero`). CMake sets `CXX_STANDARD 23` on those targets only, which needs CMake ≥ 3.20 and a recent standard library (libc++ ≥ 19, e.g. Apple clang 17+, or libstdc++ ≥ 13 with GCC 13+).
+**Exception: files 08–13 use C++23** (everything in `03_lowering/`, `04_scheduling/`, `06_frame_and_peephole/`, plus `10`) (`std::format`, `std::ranges::contains`, designated initializers, `std::countr_zero`). CMake sets `CXX_STANDARD 23` on those targets only, which needs CMake ≥ 3.20 and a recent standard library (libc++ ≥ 19, e.g. Apple clang 17+, or libstdc++ ≥ 13 with GCC 13+).
 
 ---
 
@@ -24,10 +24,13 @@ compiler-mechanics-cpp/
 │   └── techniques/                  (LLVM/MLIR idioms, grouped by family)
 │       ├── memory_layout/  compile_time/  error_handling/
 │       └── views_and_callables/  uniquing/
-├── compiler/                        ← layer 2: the pipeline (04–13)
-│   ├── compiler/ir_and_ssa/                  (04–05)
-│   ├── compiler/analysis_and_codegen/        (06–07)
-│   └── backend/                     (08–13, C++23)
+├── compiler/                        ← layer 2: the pipeline, one folder per stage (04–13)
+│   ├── 01_ir_and_ssa/               (04–05)
+│   ├── 02_analysis/                 (06)
+│   ├── 03_lowering/                 (08–09, C++23)
+│   ├── 04_scheduling/               (11, C++23)
+│   ├── 05_register_alloc/           (07, 10)
+│   └── 06_frame_and_peephole/       (12–13, C++23)
 └── docs/optimization_guide/         ← layer 3: what the optimizer does (8 chapters)
 ```
 
@@ -106,7 +109,7 @@ Numbering restarts inside each group folder. The CMake target and test name is `
 | `uniquing` | `01_string_interning` | O(1) name equality and hashing (`StringPool`, `IdentifierInfo`) |
 | | `02_hash_consing` | Structural type uniquing, so equality is `==` (MLIR `TypeStorage`, `FoldingSet`) |
 
-### `backend/` — code generation, from SSA to machine code (C++23)
+### `compiler/03_lowering/` … `06_frame_and_peephole/` — code generation, from SSA to machine code (08–13, C++23)
 
 Picks up where `07` leaves off: how SSA becomes real instructions in real registers in a real stack frame. Each file follows the same shape: theory and the "hard truths" (what's NP-complete, which heuristic replaces it) and ASCII diagrams in the header, a working implementation, tests, and a closing **CHECKPOINT** with two questions and a coding challenge. Every x86-64 claim (LEA selection, ABI register assignment, red zone, frame sizes) was checked against `clang -O2 --target=x86_64-linux-gnu` output.
 
@@ -145,16 +148,16 @@ Each topic file becomes its own executable (`01_memory_ownership`, `02_polymorph
 ### Option B — One file at a time, no CMake required
 
 ```bash
-g++ -std=c++17 -Wall -Wextra -g -I. compiler/ir_and_ssa/05_ssa_construction.cpp -o ssa
+g++ -std=c++17 -Wall -Wextra -g -I. compiler/01_ir_and_ssa/05_ssa_construction.cpp -o ssa
 ./ssa
 ```
 
-Repeat for any file. Useful when you're only studying one topic and want a fast edit-compile-run loop. For `compiler/backend/` files use `-std=c++23`.
+Repeat for any file. Useful when you're only studying one topic and want a fast edit-compile-run loop. For files 08–13 use `-std=c++23`.
 
 ### Option C — Sanitizers (recommended for file 04, which does manual pointer/list surgery)
 
 ```bash
-g++ -std=c++17 -g -fsanitize=address,undefined -I. compiler/ir_and_ssa/04_ir_data_structures.cpp -o ir
+g++ -std=c++17 -g -fsanitize=address,undefined -I. compiler/01_ir_and_ssa/04_ir_data_structures.cpp -o ir
 ./ir
 ```
 
@@ -175,7 +178,7 @@ g++ -std=c++17 -fno-rtti -I. cpp/language/03_rtti_isa_dyncast.cpp -o isa_no_rtti
 2. `04_ir_data_structures.cpp` — how IR nodes are actually stored in memory.
 3. `05_ssa_construction.cpp` — the highest-leverage file; try deleting the dead-phi elimination step and see which φ node survives, to feel the difference between minimal and pruned SSA.
 4. `06_dataflow_analysis.cpp` → `07_register_allocation.cpp` — these connect directly: liveness output becomes the register-interference graph.
-5. `compiler/backend/08` → `13` — the rest of code generation, in pipeline order: leave SSA, select instructions, allocate registers (with spilling), schedule and lay out blocks, build the frame, clean up with peepholes. Answer each file's CHECKPOINT before moving on.
+5. `compiler/03_lowering/08` → `13` — the rest of code generation, in pipeline order: leave SSA, select instructions, allocate registers (with spilling), schedule and lay out blocks, build the frame, clean up with peepholes. Answer each file's CHECKPOINT before moving on.
 
 ## License
 

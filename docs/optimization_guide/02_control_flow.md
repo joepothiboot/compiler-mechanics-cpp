@@ -108,7 +108,7 @@ SCCP combines constant propagation and unreachable-code detection into **one opt
 - **Sparseness:** SSA def-use chains mean that when a value's lattice state changes, only its users are revisited. There is no repeated sweep over the whole CFG.
 - When a branch condition becomes a constant, only one successor edge is marked executable, so the other side's values never pollute any φ.
 
-This is exactly the worklist + lattice + meet-operator framework in [06_dataflow_analysis.cpp](../../analysis_and_codegen/06_dataflow_analysis.cpp), applied sparsely over SSA edges instead of densely over basic blocks. LLVM's `IPSCCP` runs it **interprocedurally**, propagating constant arguments into callees and constant return values out of them.
+This is exactly the worklist + lattice + meet-operator framework in [06_dataflow_analysis.cpp](../../compiler/02_analysis/06_dataflow_analysis.cpp), applied sparsely over SSA edges instead of densely over basic blocks. LLVM's `IPSCCP` runs it **interprocedurally**, propagating constant arguments into callees and constant return values out of them.
 
 ### Before
 ```cpp

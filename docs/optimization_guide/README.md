@@ -22,7 +22,7 @@ Every technique follows the same four-part structure:
 | 7 | [07_interprocedural.md](07_interprocedural.md) | Inlining, function specialization, `pure`/`const`, LTO, PGO |
 | 8 | [08_hardware_level.md](08_hardware_level.md) | FMA contraction, alignment, cache-line layout, false sharing |
 
-Chapters 1–2 are the foundation: almost every later pass assumes the IR has already been cleaned up by them. The chapters build on the repo's study files. [ir_and_ssa/05_ssa_construction.cpp](../../ir_and_ssa/05_ssa_construction.cpp) builds the SSA form these passes consume, and [analysis_and_codegen/06_dataflow_analysis.cpp](../../analysis_and_codegen/06_dataflow_analysis.cpp) implements the lattice framework that SCCP and range analysis are instances of.
+Chapters 1–2 are the foundation: almost every later pass assumes the IR has already been cleaned up by them. The chapters build on the repo's study files. [ir_and_ssa/05_ssa_construction.cpp](../../compiler/01_ir_and_ssa/05_ssa_construction.cpp) builds the SSA form these passes consume, and [analysis_and_codegen/06_dataflow_analysis.cpp](../../compiler/02_analysis/06_dataflow_analysis.cpp) implements the lattice framework that SCCP and range analysis are instances of.
 
 ## How the claims were checked
 

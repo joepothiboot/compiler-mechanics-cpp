@@ -1,0 +1,21 @@
+:root{--bg:#fff;--fg:#1c1c1e;--mut:#6b7280;--card:#f4f5f7;--acc:#4f46e5;--ok:#15803d;--bad:#b91c1c;--bd:#d9dce1}
+@media(prefers-color-scheme:dark){:root{--bg:#141417;--fg:#eceef2;--mut:#9aa0ab;--card:#1e1f24;--acc:#8b87ff;--ok:#4ade80;--bad:#f87171;--bd:#33353c}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--bd)}
+h1{font-size:18px;margin:0}nav{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:5px 12px;cursor:pointer}
+button.on,button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1000px;margin:0 auto;padding:16px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.stage{flex:1 1 130px;text-align:left;padding:10px}.stage b{display:block}.stage small{color:var(--mut)}
+.stage.on{outline:2px solid var(--acc)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;margin:12px 0}
+.mut{color:var(--mut)}code{font-family:ui-monospace,monospace;font-size:13px}
+.tag{display:inline-block;font-size:12px;padding:0 8px;border-radius:99px;border:1px solid var(--bd);margin:2px 4px 2px 0}
+.tag.p1{border-color:var(--ok);color:var(--ok)}.tag.p2{border-color:var(--acc);color:var(--acc)}.tag.p3{color:var(--mut)}
+table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);vertical-align:top}
+pre{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px;overflow:auto;max-height:420px;font-size:13px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.opt{display:block;width:100%;text-align:left;margin:4px 0}.opt.right{border-color:var(--ok)}.opt.wrong{border-color:var(--bad)}
+li.item{list-style:none;margin:4px 0;padding:8px 12px;background:var(--card);border:1px solid var(--bd);border-radius:6px;display:flex;gap:8px;align-items:center}
+li.item span{flex:1}ol,ul{padding:0}

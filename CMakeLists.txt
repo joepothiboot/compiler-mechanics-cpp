@@ -40,9 +40,9 @@ foreach(src ${STUDY_SOURCES})
   endif()
   add_executable(${target} ${src})
   target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-  # backend/ is deliberately newer C++ (std::format, std::ranges::contains,
+  # files 08-13 (lowering onward) are deliberately newer C++ (std::format, std::ranges::contains,
   # designated initializers); everything else stays on LLVM's C++17 baseline.
-  if(src MATCHES "^compiler/backend/")
+  if(name MATCHES "^(08|09|1[0-3])_")
     set_target_properties(${target} PROPERTIES CXX_STANDARD 23)
   endif()
   add_test(NAME ${target} COMMAND ${target})

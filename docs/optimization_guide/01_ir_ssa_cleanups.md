@@ -200,7 +200,7 @@ Many different expressions mean the same thing. Canonicalization rewrites each o
 | `for (; i != n; ...)` | rotated loop with a guard plus a bottom test | `LoopRotate` gives every loop a single canonical shape |
 | any loop | **LoopSimplify form**: one preheader, one latch, dedicated exits | Required by LICM, unrolling and vectorization |
 
-A φ with a single incoming value, or where all incoming values are the same, is replaced by that value. This is exactly the trivial-φ removal in [05_ssa_construction.cpp](../../ir_and_ssa/05_ssa_construction.cpp).
+A φ with a single incoming value, or where all incoming values are the same, is replaced by that value. This is exactly the trivial-φ removal in [05_ssa_construction.cpp](../../compiler/01_ir_and_ssa/05_ssa_construction.cpp).
 
 ### Before
 ```cpp
